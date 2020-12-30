@@ -516,6 +516,7 @@ struct PreParam
     int width;
     int height;
     bool swapRB;
+    bool flag_gray;
 };
 
 static int post_training_quantize(const std::vector<std::string>& image_list, const std::string& param_path, const std::string& bin_path, const std::string& table_path, struct PreParam& per_param)
@@ -827,6 +828,7 @@ int main(int argc, char** argv)
                           "{norm n         |   | value of normalize (scale value, default is 1.0,1.0,1.0) }"
                           "{size s         |   | the size of input image(using the resize the original image,default is w=224,h=224) }"
                           "{swapRB c       |   | flag which indicates that swap first and last channels in 3-channel image is necessary }"
+                          "{gray g         |   | flag which indicates that gray scale image is necessary }"
                           "{thread t       | 4 | count of processing threads }";
 
 #if CV_MAJOR_VERSION < 3
@@ -874,6 +876,7 @@ int main(int argc, char** argv)
     pre_param.width = 224;
     pre_param.height = 224;
     pre_param.swapRB = false;
+    pre_param.flag_gray = false;
 
     if (parser.has("mean"))
     {
@@ -939,6 +942,18 @@ int main(int argc, char** argv)
     if (parser.has("swapRB"))
     {
         pre_param.swapRB = true;
+    }
+    
+    if (parser.has("gray"))
+    {
+        pre_param.flag_gray = true;
+        if(pre_param.swapRB)
+        {
+            fprintf(stderr, "ERROR: Searching size value from --size was failed, please check --size param.\n");
+
+            return -1;
+        }
+            
     }
 
     g_blob_pool_allocator.set_size_compare_ratio(0.0f);
